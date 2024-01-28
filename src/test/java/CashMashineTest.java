@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CashMashineTest {
 
@@ -33,7 +33,39 @@ public class CashMashineTest {
         assertEquals(20 * 7, chfSum);
     }
 
+    @Test
+    public void getWithdrawMapTest() {
+        CashMachine atm = new CashMachine();
+        atm.deposit("USD", 10, 5);
+        atm.deposit("USD", 50, 3);
 
+        HashMap<Integer, Integer> currencyNotes = atm.getCurrencyAccount("USD");
+
+        int amountToWithdraw1 = 120;
+        HashMap<Integer, Integer> withdrawMap1 = atm.getWithdrawMap(currencyNotes, amountToWithdraw1);
+
+        assertNotNull(withdrawMap1);
+        assertEquals(2, withdrawMap1.size());
+        assertEquals(2, withdrawMap1.get(50));
+        assertEquals(2, withdrawMap1.get(10));
+
+        assertEquals(1, currencyNotes.get(50));
+
+        int amountToWithdraw2 = 300;
+        HashMap<Integer, Integer> withdrawMap2 = atm.getWithdrawMap(currencyNotes, amountToWithdraw2);
+
+        assertNull(withdrawMap2);
+
+        int amountToWithdraw3 = 80;
+        HashMap<Integer, Integer> withdrawMap3 = atm.getWithdrawMap(currencyNotes, amountToWithdraw3);
+
+        assertNotNull(withdrawMap3);
+        assertEquals(2, withdrawMap3.size());
+        assertEquals(1, withdrawMap3.get(50));
+        assertEquals(3, withdrawMap3.get(10));
+        assertEquals(0, currencyNotes.get(50));
+        assertEquals(0, currencyNotes.get(10));
+    }
     @Test
     public void depositValidInputTest() {
 
@@ -94,16 +126,14 @@ public class CashMashineTest {
         assertEquals(expectedOutput, outputStreamCaptor.toString().trim());
     }
 
-    private void testGetOperation(String input, String expectedOutput, CashMachine cashMachine) {
+    private void testGetOperation(String input, String expectedOutput, CashMachine atm) {
         InputStream originalSystemIn = System.in;
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
         ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputStreamCaptor));
 
-        Controller controller = new Controller();
-
-        controller.operate(input, cashMachine);
+        atm.checkBalance();
 
         System.setIn(originalSystemIn);
         System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
@@ -121,7 +151,7 @@ public class CashMashineTest {
         }
 
         for (String currency : expectedBalances.keySet()) {
-            assertEquals(expectedBalances.get(currency), cashMachine.getCurrencyAccount(currency));
+            assertEquals(expectedBalances.get(currency), atm.getCurrencyAccount(currency));
         }
     }
 

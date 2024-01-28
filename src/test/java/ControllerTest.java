@@ -99,13 +99,14 @@ public class ControllerTest {
 
 
     @Test
-    public void depositValidInputTest() {
+    public void updateValidInputTest() {
 
         CashMachine atm = new CashMachine();
-        atm.deposit("USD", 10, 5);
         Controller controller = new Controller();
+        controller.put("+ USD 10 5", atm);
         ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputStreamCaptor));
+
         String input = "- USD 20";
         controller.update(input, atm);
         String expectedOutput = "10 2\nOK";
@@ -148,9 +149,9 @@ public class ControllerTest {
         CashMachine atm = new CashMachine();
         Controller controller = new Controller();
 
-        controller.put("CHF 100 5", atm);
-        controller.put("USD 10 48", atm);
-        controller.put("USD 100 295", atm);
+        controller.put("+ CHF 100 5", atm);
+        controller.put("+ USD 10 48", atm);
+        controller.put("+ USD 100 29", atm);
 
         String input = "?";
         String expectedOutput = "CHF 100 5\nUSD 10 48\nUSD 100 29\nOK";
@@ -166,12 +167,11 @@ public class ControllerTest {
 
         controller.operate("+ CHF 100 5", atm);
         controller.put("+ USD 10 48", atm);
-        controller.put("+ USD 10 29", atm);
+        controller.put("+ USD 100 29", atm);
 
         String updateInput = "- USD 50";
         String updateExpectedOutput = "10 5\nOK";
 
-//        controller.update(updateInput, atm);
         testUpdateOperation(updateInput, updateExpectedOutput, atm);
 
         String getBalanceInput = "?";
